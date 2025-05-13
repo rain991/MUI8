@@ -1,5 +1,6 @@
 package com.savenko.mui8.presentation
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.savenko.mui8.data.Borrower
@@ -34,6 +36,7 @@ fun BorrowersScreen(
     borrowersList: List<Borrower>,
     currenciesList: List<Currency>
 ) {
+    val localContext= LocalContext.current
     var currentDataSet by remember {
         mutableStateOf(borrowersList)
     }
@@ -84,7 +87,7 @@ fun BorrowersScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
                     LoanInputField(currentValue = borrowingAmount.amount){
-                        borrowingAmount = borrowingAmount.copy(amount = it)
+                        borrowingAmount = borrowingAmount.copy(amount = it.toULong().toFloat())
                     }
                     CurrencySelector(selectedCurrency = borrowingAmount.currency, onCurrencyChange = {
                         val currentCurrencyIndex = currenciesList.indexOf(borrowingAmount.currency)
@@ -94,9 +97,12 @@ fun BorrowersScreen(
                 Button(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     onClick = {
+                        if(borrowingAmount.amount <= 0){
+                            Toast.makeText(localContext, "Amount should be greater than 0", Toast.LENGTH_SHORT).show()
+                        }
                         val newBorrower = currentSelectedBorrower?.copy(debt = borrowingAmount)
                         if(selectedBorrowers.any{ it.isSamePerson(newBorrower!!) }){
-                            selectedBorrowers.remove(currentSelectedBorrower)
+                            selectedBorrowers.remove(selectedBorrowers.find{ it.isSamePerson(newBorrower!!) })
                         }
                         selectedBorrowers.add(currentSelectedBorrower?.copy(debt = borrowingAmount)!!) }) {
                     Text("Add loan")

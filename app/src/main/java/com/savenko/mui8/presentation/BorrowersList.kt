@@ -2,7 +2,9 @@ package com.savenko.mui8.presentation
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -38,6 +40,14 @@ fun BorrowersList(dataSet: List<Borrower>, onBorrowerSelected: (Borrower) -> Uni
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.align(Alignment.CenterHorizontally),
                     )
+                    if(currentItem.debt.amount > 0.0f){
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "${currentItem.debt.amount} ${currentItem.debt.currency.ticker}",
+                            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary),
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                        )
+                    }
                 }
 
             }
