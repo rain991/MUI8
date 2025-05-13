@@ -1,4 +1,4 @@
-package com.savenko.mui8.ui.theme
+package com.savenko.mui8.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
