@@ -2,7 +2,6 @@ package com.savenko.mui8.presentation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -15,16 +14,13 @@ import androidx.compose.ui.unit.dp
 import com.savenko.mui8.data.Borrower
 
 @Composable
-fun BorrowerDetails(borrower: Borrower) {
+fun BorrowerDetails(modifier : Modifier, borrower: Borrower) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp)
+        modifier = modifier
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(8.dp)
         ) {
             Text(
                 text = borrower.credentials.name + " " + borrower.credentials.surname,

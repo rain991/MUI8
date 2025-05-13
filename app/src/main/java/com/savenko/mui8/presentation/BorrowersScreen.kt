@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -30,14 +31,15 @@ import com.savenko.mui8.data.Currency
 @Composable
 fun BorrowersScreen(
     paddingValues: PaddingValues,
-    borrowersList : List<Borrower>,
-    currenciesList : List<Currency>
+    borrowersList: List<Borrower>,
+    currenciesList: List<Currency>
 ) {
     var currentDataSet by remember {
         mutableStateOf(borrowersList)
     }
     var currentSelectedBorrower by remember { mutableStateOf<Borrower?>(null) }
     val selectedBorrowers = remember { mutableStateListOf<Borrower>() }
+    var borrowingAmount by remember { mutableStateOf(Borrower.Debt(amount = 0.0f, currency = currenciesList.first())) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -57,14 +59,17 @@ fun BorrowersScreen(
                 isSelected = currentDataSet == borrowersList
             )
             TabItem(
-                onClick =  { currentDataSet = selectedBorrowers },
+                onClick = { currentDataSet = selectedBorrowers },
                 header = "Ongoing loans",
                 isSelected = currentDataSet == selectedBorrowers
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        BorrowersList(dataSet = currentDataSet, onBorrowerSelected = { currentSelectedBorrower = it })
-        if (currentSelectedBorrower != null) {
+        BorrowersList(
+            dataSet = currentDataSet,
+            onBorrowerSelected = { currentSelectedBorrower = it
+            borrowingAmount = it.debt})
+        if (currentSelectedBorrower != null && currentDataSet != selectedBorrowers) {
             Spacer(modifier = Modifier.height(12.dp))
             HorizontalDivider(
                 modifier = Modifier
@@ -73,17 +78,31 @@ fun BorrowersScreen(
             )
             Spacer(modifier = Modifier.height(12.dp))
         }
-        AnimatedVisibility(visible = currentSelectedBorrower != null) {
+        AnimatedVisibility(visible = currentSelectedBorrower != null && currentDataSet != selectedBorrowers) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                BorrowerDetails(currentSelectedBorrower!!)
+                BorrowerDetails(modifier = Modifier.wrapContentSize().align(Alignment.CenterHorizontally),borrower = currentSelectedBorrower!!)
                 Spacer(modifier = Modifier.height(4.dp))
-
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center){
+                    LoanInputField(currentValue = borrowingAmount.amount){
+                        borrowingAmount = borrowingAmount.copy(amount = it)
+                    }
+                    CurrencySelector(selectedCurrency = borrowingAmount.currency, onCurrencyChange = {
+                        val currentCurrencyIndex = currenciesList.indexOf(borrowingAmount.currency)
+                        borrowingAmount = borrowingAmount.copy(currency = currenciesList[(currentCurrencyIndex + 1) % currenciesList.size]) })
+                }
+                Spacer(modifier = Modifier.height(4.dp))
                 Button(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    onClick = { selectedBorrowers.add(currentSelectedBorrower!!) }) {
+                    onClick = {
+                        val newBorrower = currentSelectedBorrower?.copy(debt = borrowingAmount)
+                        if(selectedBorrowers.any{ it.isSamePerson(newBorrower!!) }){
+                            selectedBorrowers.remove(currentSelectedBorrower)
+                        }
+                        selectedBorrowers.add(currentSelectedBorrower?.copy(debt = borrowingAmount)!!) }) {
                     Text("Add loan")
                 }
             }
+
         }
     }
 }
